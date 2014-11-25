@@ -1,9 +1,37 @@
+//check if all the pieces are on the board and then display a begin button
+
 var carrier = [];
 var battleship = [];
 var sub = [];
 var destroyer = [];
 var patrol = [];
 var unabated = true;
+
+var firebase = new Firebase("https://adamsbattleship.firebaseio.com/");
+
+firebase.set({
+  playerOneReady: false,
+  playerTwoReady: false,
+  playersTurn: 1,
+  attackedCell: 0,
+  hit: false,
+  playerOne: {
+    carrier: 5,
+    battleship: 4,
+    sub: 3,
+    destroyer: 3,
+    patrol: 2,
+    totalHealth: 17
+  },
+  playerTwo: {
+    carrier: 5,
+    battleship: 4,
+    sub: 3,
+    destroyer: 3,
+    patrol: 2,
+    totalHealth: 17
+  }
+});
 
 $(document).ready(function() {
 
@@ -34,10 +62,10 @@ $(document).ready(function() {
     for (var i = 0; i < length; i++) {
       if (orientation == 'Horizontal'){
         var cellCoordinates = [coordinates[0] + i, coordinates[1]];
-        var cellElement = boardCell(cellCoordinates);
+        var cellElement = boardCell(cellCoordinates, 1);
       } else { //For vertical orientation
         var cellCoordinates = [coordinates[0], coordinates[1] - i ];
-        var cellElement = boardCell(cellCoordinates);
+        var cellElement = boardCell(cellCoordinates, 1);
       }
       if (cellElement.hasClass('occupied')) {
         unabated = false;
@@ -102,10 +130,10 @@ $(document).ready(function() {
     for (var i = 0; i < length; i++) {
       if (orientation == 'Horizontal'){
         var cellCoordinates = [coordinates[0] + i, coordinates[1]];
-        var cellElement = boardCell(cellCoordinates);
+        var cellElement = boardCell(cellCoordinates, 1);
       } else { //For vertical orientation
         var cellCoordinates = [coordinates[0], coordinates[1] - i ];
-        var cellElement = boardCell(cellCoordinates);
+        var cellElement = boardCell(cellCoordinates, 1);
       }
       if (i === length-1){
         cellElement.css("background-image", "url('tableimages/" + orientation + (5) +".gif')");
@@ -137,10 +165,10 @@ $(document).ready(function() {
     }
   }
 
-  function boardCell(coordinates) {
+  function boardCell(coordinates, gridNumber) {
     var x = coordinates[0];
     var y = coordinates[1];
-    var cell = $(".sea-1 td[data-x='" + x + "'][data-y='" + y + "']");
+    var cell = $(".sea-" + gridNumber + " td[data-x='" + x + "'][data-y='" + y + "']");
     return cell;
   }
 
@@ -167,5 +195,28 @@ $(document).ready(function() {
       $(this).height(width);
     })
   });
+
+
+
+  $('.sea-2 td').click(function(){
+    var x = $(this).data("x");
+    var y = $(this).data("y");
+    var attackCoordinates = [x, y];
+    takeFire(attackCoordinates);
+  });
+
+
+
+  function takeFire(coordinates) {
+    var cellCoordinates = [coordinates[0], coordinates[1]];
+    // var cellElement = boardCell(cellCoordinates, 2);
+    firebase.set({
+      playerOneAttack: cellCoordinates
+    });
+  }
+
+
+
+
 
 });

@@ -3,7 +3,7 @@
   width: 400px;
   border: 5px solid black;
   border-spacing: 0;
-  margin: 100px;
+  margin: 10px;
   float: left;
 }
 
@@ -12,7 +12,7 @@
   width: 220px;
   border: 5px solid black;
   border-spacing: 0;
-  margin: 100px;
+  margin: 10px;
   float: left;
   background-color: #8484FF;
 }
@@ -25,6 +25,10 @@ td {
   background: url('tableimages/blank.gif');
   background-size: 40px 40px;
   background-repeat: no-repeat;
+}
+
+#toggle {
+  float: left;
 }
 
 .ship-one-x {
