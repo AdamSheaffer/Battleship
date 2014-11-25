@@ -1,2 +1,6 @@
 _site/
 .sass-cache/
+.DS_Store
+.sass
+node_modules
+app/_bower_components
