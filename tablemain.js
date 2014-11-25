@@ -1,33 +1,55 @@
-//checkIfPeiceFits should check for other ships
-//ships in fleet should be hidden when placed on the board
-
-
 var carrier = [];
 var battleship = [];
 var sub = [];
 var destroyer = [];
 var patrol = [];
+var unabated = true;
 
 $(document).ready(function() {
 
   // Mother function
-  $('td').click(function(){
+  $('.sea-1 td').click(function(){
     var x = $(this).data("x");
     var y = $(this).data("y");
     var coordinates = [x, y];
     var length = shipLength(selectedPiece);
     var fitsOnSea = checkIfPieceFits(coordinates, length, orientation);
-    if (fitsOnSea) {
+    checkForOtherShips(coordinates, length, orientation);
+    if (fitsOnSea && unabated) {
       renderPieces(coordinates, length, orientation, selectedPiece);
+      hideFromFleet(selectedPiece);
     } else {
       alert("Over the line!");
     }
-
-    // storeCoordinates();
   });
 
+  //Hide ships from fleet after placing on board
+  function hideFromFleet(selectedPiece) {
+    var piece = '#'+selectedPiece;
+    $(piece).hide('highlight', 200);
+  }
+
+  function checkForOtherShips(coordinates, length, orientation) {
+    // For horizontal orientation
+    for (var i = 0; i < length; i++) {
+      if (orientation == 'Horizontal'){
+        var cellCoordinates = [coordinates[0] + i, coordinates[1]];
+        var cellElement = boardCell(cellCoordinates);
+      } else { //For vertical orientation
+        var cellCoordinates = [coordinates[0], coordinates[1] - i ];
+        var cellElement = boardCell(cellCoordinates);
+      }
+      if (cellElement.hasClass('occupied')) {
+        unabated = false;
+        break;
+      } else {
+        unabated = true;
+      }
+    }
+  }
+
   function checkIfPieceFits(coordinates, length, orientation) {
-    var gridLength = $('.sea tr').length;
+    var gridLength = $('.sea-1 tr').length;
     if(orientation == 'Horizontal') {
       if (coordinates[0] + length > gridLength + 1) {
         return false;
@@ -85,10 +107,12 @@ $(document).ready(function() {
         var cellCoordinates = [coordinates[0], coordinates[1] - i ];
         var cellElement = boardCell(cellCoordinates);
       }
-      if (i === length -1){
+      if (i === length-1){
         cellElement.css("background-image", "url('tableimages/" + orientation + (5) +".gif')");
+        cellElement.addClass('occupied');
       } else {
         cellElement.css("background-image", "url('tableimages/" + orientation + (i+1) +".gif')");
+        cellElement.addClass('occupied');
       }
       logCoordinates(cellCoordinates, selectedPiece);
     }
@@ -116,7 +140,7 @@ $(document).ready(function() {
   function boardCell(coordinates) {
     var x = coordinates[0];
     var y = coordinates[1];
-    var cell = $("td[data-x='" + x + "'][data-y='" + y + "']");
+    var cell = $(".sea-1 td[data-x='" + x + "'][data-y='" + y + "']");
     return cell;
   }
 
