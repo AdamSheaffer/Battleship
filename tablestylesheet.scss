@@ -1,3 +1,7 @@
+h1 {
+  text-align: center;
+}
+
 .sea-1, .sea-2 {
   height: 400px;
   width: 400px;
@@ -5,6 +9,23 @@
   border-spacing: 0;
   margin: 10px;
   float: left;
+}
+
+.sea-2 {
+  float: right;
+}
+
+#wrapper {
+  float: left;
+  width: 240px;
+}
+
+#toggle {
+  width: 220px;
+  margin: auto;
+  cursor: pointer;
+  color: green;
+  text-align: center;
 }
 
 .fleet {
@@ -25,10 +46,6 @@ td {
   background: url('tableimages/blank.gif');
   background-size: 40px 40px;
   background-repeat: no-repeat;
-}
-
-#toggle {
-  float: left;
 }
 
 .ship-one-x {
