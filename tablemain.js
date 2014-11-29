@@ -1,19 +1,24 @@
-//fix up styling
 //maybe make a modal for when you first open up the page -- 'prepare for battle'
-//check if all the pieces are on the board and then display a begin button
-//clicking begin button should change firebase ready to true
-
-//create player id's
 
 var gameRef;
 var myPlayerNumber;
+var opponent;
 
+//Taken fro the firebase recipe page
 function go() {
   var userId = prompt('Username?', 'Guest');
   // Consider adding '/<unique id>' if you have multiple games.
   gameRef = new Firebase(GAME_LOCATION);
   assignPlayerNumberAndPlayGame(userId, gameRef);
 };
+
+function findOpponentNumber(myPlayerNumber) {
+  if (myPlayerNumber === 1) {
+    opponent = 0
+  } else {
+    opponent = 1;
+  }
+}
 
 // The maximum number of players.  If there are already
 // NUM_PLAYERS assigned, users won't be able to join the game.
@@ -30,17 +35,24 @@ var PLAYERS_LOCATION = 'player_list';
 // for each player (their game state, etc.)
 var PLAYER_DATA_LOCATION = 'player_data';
 
+// A location under GAME_LOCATION that you will use to track
+//which player's turn it is.
+var PLAYER_TURN_LOCATION = 'player_turn';
+
 
 // Called after player assignment completes.
 function playGame(myPlayerNumber, userId, justJoinedGame, gameRef) {
   var playerDataRef = gameRef.child(PLAYER_DATA_LOCATION).child(myPlayerNumber);
+  var turnCounterLocation = gameRef.child(PLAYER_TURN_LOCATION);
   alert('You are player number ' + myPlayerNumber +
-      '.  Your data will be located at ' + playerDataRef.toString());
-
-  if (justJoinedGame) {
-    alert('Doing first-time initialization of data.');
+    '.  Your data will be located at ' + playerDataRef.toString());
+  findOpponentNumber(myPlayerNumber);
+  playerDataRef.child('fleet').set('');
+  turnCounterLocation.set(0);
+  //if (justJoinedGame) {
+    //alert('Doing first-time initialization of data.');
     playerDataRef.set({userId: userId, state: 'game state'});
-  }
+  //}
 }
 
 // Use transaction() to assign a player number, then call playGame().
@@ -103,6 +115,7 @@ var unabated = true;
 $(document).ready(function() {
 
   go(); //initialize firebase
+
 
   $( ".piece" ).draggable({ opacity: 0.6, revert: 'invalid', Index: 100, appenTo: 'td' });
   $('.sea-1 td').droppable();
@@ -289,23 +302,37 @@ $(document).ready(function() {
 
   //Attacking
   var hit = false;
+  var allPiecesAreOnBoard = false;
+  var playerTurn;
 
   $('.sea-2 td').click(function(){
-    var x = $(this).data("x");
-    var y = $(this).data("y");
-    var attackCoordinates = [x, y];
-    var opponent = opponentNumber(myPlayerNumber);
-    gameRef.child("player_data/" + opponent + "/fleet").on("value", function(snapshot) {
-      var opponentCarrier = snapshot.val().carrier;
-      var opponentBattleship = snapshot.val().battleship;
-      var opponentDestroyer = snapshot.val().destroyer;
-      var opponentSub = snapshot.val().sub;
-      var opponentPatrol = snapshot.val().patrol;
-      var totalOccupiedCells = opponentCarrier.concat(opponentBattleship, opponentDestroyer, opponentSub, opponentPatrol);
-      checkForHit(attackCoordinates, totalOccupiedCells); //check for hit or miss
-      renderAttack(attackCoordinates); //render attack with css
-    });
+    checkTurn();
+    console.log(playerTurn);
+    if(playerTurn === myPlayerNumber && allPiecesAreOnBoard) {
+      var x = $(this).data("x");
+      var y = $(this).data("y");
+      var attackCoordinates = [x, y];
+      gameRef.child("player_data/" + opponent + "/fleet").on("value", function(snapshot) {
+        var opponentCarrier = snapshot.val().carrier;
+        var opponentBattleship = snapshot.val().battleship;
+        var opponentDestroyer = snapshot.val().destroyer;
+        var opponentSub = snapshot.val().sub;
+        var opponentPatrol = snapshot.val().patrol;
+        var totalOccupiedCells = opponentCarrier.concat(opponentBattleship, opponentDestroyer, opponentSub, opponentPatrol);
+        checkForHit(attackCoordinates, totalOccupiedCells); //check for hit or miss
+        renderAttack(attackCoordinates); //render attack with css
+        gameRef.child(PLAYER_TURN_LOCATION).set(opponent);
+        console.log(myPlayerNumber + ' just attacked. Now ' + playerTurn + 's turn' );
+      });
+    }
   });
+
+  function checkTurn(){
+    gameRef.child(PLAYER_TURN_LOCATION).on("value", function(snapshot) {
+      var turn = snapshot.val();
+      playerTurn = turn;
+    });
+  }
 
   function checkForHit(attackCoordinates, totalOccupiedCells) {
     for (var i=0; i<totalOccupiedCells.length; i++) {
@@ -329,26 +356,28 @@ $(document).ready(function() {
     }
   }
 
-  function opponentNumber(myPlayerNumber) {
-    if (myPlayerNumber === 1) {
-      return 0
-    } else {
-      return 1;
-    }
-  }
-
-  var allPiecesAreOnBoard = false;
-
   function gameInit() {
     gameRef.child("player_data/" + myPlayerNumber + "/state").set('ready');
-    var opponent = opponentNumber(myPlayerNumber);
     gameRef.child("player_data/" + opponent + "/state").on("value", function(snapshot) {
       var opponentReady = snapshot.val();
       if (opponentReady !== "ready") {
         $('#lightbox').show('drop');
         $('#begin-modal').show('drop');
+        waitForOpponent();
       }
     });
   }
-  
+
+  function waitForOpponent() {
+    var opponentReadyStatus = gameRef.child("/player_data/" + opponent);
+    opponentReadyStatus.on("child_changed", function(snapshot) {
+      var changedStatus = snapshot.val();
+      console.log(changedStatus);
+      if (changedStatus === "ready") {
+        $('#lightbox').hide('pulsate');
+        $('#begin-modal').hide('pulsate');
+      }
+    });
+  }
+
 });
