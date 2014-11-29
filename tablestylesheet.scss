@@ -1,14 +1,29 @@
+* {
+  font-family: 'Cinzel Decorative', cursive;
+  text-shadow: 2px 2px gray;
+}
+
+body {
+  background: url('tableimages/background.jpg');
+  background-repeat: no-repeat;
+  background-size: cover;
+  text-shadow: 2px 4px gray;
+}
+
 h1 {
   text-align: center;
+  font-size: 68px;
 }
 
 .sea-1, .sea-2 {
   height: 400px;
   width: 400px;
-  border: 5px solid black;
+  border: 2px solid #151515;
   border-spacing: 0;
   margin: 10px;
   float: left;
+  box-shadow: #343434 10px 10px 20px;
+  border-radius: 2px;
 }
 
 .sea-2 {
@@ -21,27 +36,36 @@ h1 {
 }
 
 #toggle {
+  background: -webkit-linear-gradient(right top, #775C43 , #c4a761); /* For Safari 5.1 to 6.0 */
+  background: -o-linear-gradient(bottom left, #775C43, #c4a761); /* For Opera 11.1 to 12.0 */
+  background: -moz-linear-gradient(bottom left, #775C43, #c4a761); /* For Firefox 3.6 to 15 */
+  background: linear-gradient(to bottom left, #775C43 , #c4a761); /* Standard syntax */
   width: 220px;
   margin: auto;
   cursor: pointer;
-  color: green;
   text-align: center;
+  box-shadow: #343434 5px 5px 15px;
+  border-radius: 2px;
+  border: 1px solid #151515;
+  font-weight: 700;
 }
 
 .fleet {
   height: 220px;
   width: 220px;
-  border: 5px solid black;
+  border: 2px solid #151515;
   border-spacing: 0;
   margin: 10px;
   float: left;
   background-color: #8484FF;
+  box-shadow: #343434 10px 10px 20px;
+  border-radius: 2px;
 }
 
 td {
   height: 40px;
   width: 40px;
-  border: 1px solid black;
+  border: 1px solid #151515;
   padding: 0;
   background: url('tableimages/blank.gif');
   background-size: 40px 40px;
@@ -110,6 +134,7 @@ td {
 
 .piece {
   display: inline-block;
+  cursor: move;
 }
 
 #carrier {
@@ -142,4 +167,33 @@ td {
   height: 40px;
   background-size: 80px 40px;
   background-repeat: no-repeat;
+}
+
+#lightbox {
+  position: fixed;
+  height: 100%;
+  width: 100%;
+  background: #000;
+  opacity: .7;
+  top: 0;
+  left: 0;
+  display: none;
+}
+
+#begin-modal {
+  display: none;
+  top: 15%;
+  left: 35%;
+  position: fixed;
+  width: 30%;
+  min-width: 300px;
+  display: none;
+  box-shadow: #343434 5px 5px 15px;
+  padding: 20px;
+  box-sizing: border-box;
+  border-radius: 2px;
+  background-color: #f8f8f8;
+  border: solid 5px #CECECE;
+  font-size: 24px;
+  font-weight: 700;
 }

@@ -2,6 +2,7 @@
 <html>
   <head>
     <meta charset='utf-8'>
+    <link href='http://fonts.googleapis.com/css?family=Cinzel+Decorative:400,900' rel='stylesheet' type='text/css'>
     <link rel="stylesheet" href="tablestylesheet.scss" />
     <script src='bower_components/firebase/firebase.js'></script>
   </head>
@@ -130,7 +131,7 @@
       </tr>
     </table>
     <div id='wrapper'>
-      <div id="toggle">Toggle Orientation</div>
+      <div id="toggle">Rotate Fleet</div>
       <div class='fleet'>
         <div class="piece" id="carrier" data-name="carrier"></div>
         <div class="piece" id="battleship" data-name="battleship"></div>
@@ -261,6 +262,10 @@
         <td data-x="10" data-y="1"></td>
       </tr>
     </table>
+    <div id="lightbox"></div>
+      <div id="begin-modal">
+        <p>Waiting on Player 2...</p>
+      </div>
   </body>
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.8.0/jquery.min.js"></script>
   <script src="http://ajax.googleapis.com/ajax/libs/jqueryui/1.11.2/jquery-ui.min.js"></script>

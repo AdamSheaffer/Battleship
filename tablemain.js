@@ -3,6 +3,8 @@
 //check if all the pieces are on the board and then display a begin button
 //clicking begin button should change firebase ready to true
 
+//create player id's
+
 var gameRef;
 var myPlayerNumber;
 
@@ -90,23 +92,7 @@ function assignPlayerNumberAndPlayGame(userId, gameRef) {
   });
 }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+//Ship Coordinates
 var carrier = [];
 var battleship = [];
 var sub = [];
@@ -114,39 +100,14 @@ var destroyer = [];
 var patrol = [];
 var unabated = true;
 
-
-// firebase.set({
-//   playerOneReady: false,
-//   playerTwoReady: false,
-//   playersTurn: 1,
-//   attackedCell: 0,
-//   hit: false,
-//   playerOne: {
-//     carrier: 5,
-//     battleship: 4,
-//     sub: 3,
-//     destroyer: 3,
-//     patrol: 2,
-//     totalHealth: 17
-//   },
-//   playerTwo: {
-//     carrier: 5,
-//     battleship: 4,
-//     sub: 3,
-//     destroyer: 3,
-//     patrol: 2,
-//     totalHealth: 17
-//   }
-// });
-
 $(document).ready(function() {
 
-  go();
+  go(); //initialize firebase
 
   $( ".piece" ).draggable({ opacity: 0.6, revert: 'invalid', Index: 100, appenTo: 'td' });
   $('.sea-1 td').droppable();
 
-  // Mother function
+  // Mother function for setting the board
   $('.sea-1 td').on('drop', function(){
     var x = $(this).data("x");
     var y = $(this).data("y");
@@ -257,33 +218,34 @@ $(document).ready(function() {
       }
       logCoordinates(cellCoordinates, selectedPiece);
     }
+    fleetSet();
   }
 
   function logCoordinates(coordinates, selectedPiece) {
-    function fleetSet(boat) {
-      gameRef.child("player_data/" + myPlayerNumber + "/fleet/" + boat).push(coordinates);
-    }
     switch(selectedPiece) {
       case 'carrier':
         carrier.push(coordinates);
-        fleetSet('carrier');
         break;
       case 'battleship':
         battleship.push(coordinates);
-        fleetSet('battleship');
         break;
       case 'sub':
         sub.push(coordinates);
-        fleetSet('sub');
         break;
       case 'destroyer':
         destroyer.push(coordinates);
-        fleetSet('destroyer');
         break;
       case 'patrol':
         patrol.push(coordinates);
-        fleetSet('patrol');
     }
+  }
+
+  function fleetSet() { //to log to database
+    gameRef.child("player_data/" + myPlayerNumber + "/fleet/carrier").set(carrier);
+    gameRef.child("player_data/" + myPlayerNumber + "/fleet/battleship").set(battleship);
+    gameRef.child("player_data/" + myPlayerNumber + "/fleet/sub").set(sub);
+    gameRef.child("player_data/" + myPlayerNumber + "/fleet/destroyer").set(destroyer);
+    gameRef.child("player_data/" + myPlayerNumber + "/fleet/patrol").set(patrol);
   }
 
   function boardCell(coordinates, gridNumber) {
@@ -291,6 +253,14 @@ $(document).ready(function() {
     var y = coordinates[1];
     var cell = $(".sea-" + gridNumber + " td[data-x='" + x + "'][data-y='" + y + "']");
     return cell;
+  }
+
+  function checkIfAllPiecesArePlaced() {
+    var occupiedSquares = $('.sea-1 .occupied').length;
+    if( occupiedSquares === 17) {
+      allPiecesAreOnBoard = true;
+      gameInit();
+    }
   }
 
   // TOGGLE ORIENTATION
@@ -304,7 +274,7 @@ $(document).ready(function() {
     }
   }
 
-  $("div#toggle").click(function() {
+  $("div#toggle").click(function() { //flip ship orientation
     toggleOrientation();
     $("div.piece").each(function() {
       var width = $(this).width();
@@ -317,39 +287,68 @@ $(document).ready(function() {
     })
   });
 
-
+  //Attacking
+  var hit = false;
 
   $('.sea-2 td').click(function(){
     var x = $(this).data("x");
     var y = $(this).data("y");
     var attackCoordinates = [x, y];
-    takeFire(attackCoordinates);
+    var opponent = opponentNumber(myPlayerNumber);
+    gameRef.child("player_data/" + opponent + "/fleet").on("value", function(snapshot) {
+      var opponentCarrier = snapshot.val().carrier;
+      var opponentBattleship = snapshot.val().battleship;
+      var opponentDestroyer = snapshot.val().destroyer;
+      var opponentSub = snapshot.val().sub;
+      var opponentPatrol = snapshot.val().patrol;
+      var totalOccupiedCells = opponentCarrier.concat(opponentBattleship, opponentDestroyer, opponentSub, opponentPatrol);
+      checkForHit(attackCoordinates, totalOccupiedCells); //check for hit or miss
+      renderAttack(attackCoordinates); //render attack with css
+    });
   });
 
+  function checkForHit(attackCoordinates, totalOccupiedCells) {
+    for (var i=0; i<totalOccupiedCells.length; i++) {
+      console.log(attackCoordinates.toString() + 'and' + totalOccupiedCells[i].toString() );
+      if (attackCoordinates.toString() === totalOccupiedCells[i].toString()) {
+        hit = true;
+        break;
+      } else {
+        hit = false;
+      }
+    }
+  }
 
-
-  function takeFire(coordinates) {
+  function renderAttack(coordinates) {
     var cellCoordinates = [coordinates[0], coordinates[1]];
     var cellElement = boardCell(cellCoordinates, 2);
+    if (hit === true) {
+      cellElement.css("background-image", "url('tableimages/hit.gif')");
+    } else {
+      cellElement.css("background-image", "url('tableimages/miss.gif')");
+    }
+  }
+
+  function opponentNumber(myPlayerNumber) {
+    if (myPlayerNumber === 1) {
+      return 0
+    } else {
+      return 1;
+    }
   }
 
   var allPiecesAreOnBoard = false;
 
-  function checkIfAllPiecesArePlaced() {
-    var occupiedSquares = $('.sea-1 .occupied').length;
-    if( occupiedSquares === 17) {
-      allPiecesAreOnBoard = true;
-      gameInit();
-    }
-  }
-
   function gameInit() {
     gameRef.child("player_data/" + myPlayerNumber + "/state").set('ready');
-
-
-    gameRef.child("player_data/" + myPlayerNumber + "/state").on("value", function(snapshot) {
-      alert(snapshot.val());
+    var opponent = opponentNumber(myPlayerNumber);
+    gameRef.child("player_data/" + opponent + "/state").on("value", function(snapshot) {
+      var opponentReady = snapshot.val();
+      if (opponentReady !== "ready") {
+        $('#lightbox').show('drop');
+        $('#begin-modal').show('drop');
+      }
     });
   }
-
+  
 });
