@@ -124,7 +124,6 @@ $(document).ready(function() {
   $('.sea-1 td').on('drop', function(){
     var x = $(this).data("x");
     var y = $(this).data("y");
-    console.log(x +'' + y);
     var coordinates = [x, y];
     var length = shipLength(selectedPiece);
     var fitsOnSea = checkIfPieceFits(coordinates, length, orientation);
@@ -185,7 +184,6 @@ $(document).ready(function() {
 
   function selectPiece(pieceName) {
     selectedPiece = pieceName;
-    console.log(selectedPiece);
   }
 
   function shipLength(pieceName) {
@@ -307,7 +305,6 @@ $(document).ready(function() {
 
   $('.sea-2 td').click(function(){
     checkTurn();
-    console.log(playerTurn);
     if(playerTurn === myPlayerNumber && allPiecesAreOnBoard) {
       var x = $(this).data("x");
       var y = $(this).data("y");
@@ -318,11 +315,11 @@ $(document).ready(function() {
         var opponentDestroyer = snapshot.val().destroyer;
         var opponentSub = snapshot.val().sub;
         var opponentPatrol = snapshot.val().patrol;
-        var totalOccupiedCells = opponentCarrier.concat(opponentBattleship, opponentDestroyer, opponentSub, opponentPatrol);
+        var totalOccupiedCells = [opponentCarrier, opponentBattleship, opponentDestroyer, opponentSub, opponentPatrol];
+        debugger
         checkForHit(attackCoordinates, totalOccupiedCells); //check for hit or miss
         renderAttack(attackCoordinates); //render attack with css
         gameRef.child(PLAYER_TURN_LOCATION).set(opponent);
-        console.log(myPlayerNumber + ' just attacked. Now ' + playerTurn + 's turn' );
       });
     }
   });
@@ -336,13 +333,34 @@ $(document).ready(function() {
 
   function checkForHit(attackCoordinates, totalOccupiedCells) {
     for (var i=0; i<totalOccupiedCells.length; i++) {
-      console.log(attackCoordinates.toString() + 'and' + totalOccupiedCells[i].toString() );
-      if (attackCoordinates.toString() === totalOccupiedCells[i].toString()) {
-        hit = true;
-        break;
-      } else {
-        hit = false;
+      for(var j=0; j<totalOccupiedCells[i].length; j++) {
+        if (attackCoordinates.toString() === totalOccupiedCells[i][j].toString()) {
+          hit = true;
+          checkWhichShip(i);
+          return
+        } else {
+          hit = false;
+        }
       }
+    }
+  }
+
+  function checkWhichShip(i) {
+    switch(i) {
+      case 0:
+        alert('hit the carrier');
+        break;
+      case 1:
+        alert('hit the battleship');
+        break;
+      case 2:
+        alert('hit the destroyer');
+        break;
+      case 3:
+        alert('hit the sub');
+        break;
+      case 4:
+        alert('hit the patrol');
     }
   }
 
@@ -372,7 +390,6 @@ $(document).ready(function() {
     var opponentReadyStatus = gameRef.child("/player_data/" + opponent);
     opponentReadyStatus.on("child_changed", function(snapshot) {
       var changedStatus = snapshot.val();
-      console.log(changedStatus);
       if (changedStatus === "ready") {
         $('#lightbox').hide('pulsate');
         $('#begin-modal').hide('pulsate');
