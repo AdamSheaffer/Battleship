@@ -252,11 +252,18 @@ $(document).ready(function() {
   }
 
   function fleetSet() { //to log to database
-    gameRef.child("player_data/" + myPlayerNumber + "/fleet/carrier").set(carrier);
-    gameRef.child("player_data/" + myPlayerNumber + "/fleet/battleship").set(battleship);
-    gameRef.child("player_data/" + myPlayerNumber + "/fleet/sub").set(sub);
-    gameRef.child("player_data/" + myPlayerNumber + "/fleet/destroyer").set(destroyer);
-    gameRef.child("player_data/" + myPlayerNumber + "/fleet/patrol").set(patrol);
+    var fleet = gameRef.child("player_data/" + myPlayerNumber + "/fleet/");
+    var fleetHealth = gameRef.child("player_data/" + myPlayerNumber + "/health");
+    fleet.child("carrier").set(carrier);
+    fleetHealth.child("carrier/health").set(5);
+    fleet.child("battleship").set(battleship);
+    fleetHealth.child("battleship/health").set(4);
+    fleet.child("sub").set(sub);
+    fleetHealth.child("sub/health").set(3);
+    fleet.child("destroyer").set(destroyer);
+    fleetHealth.child("destroyer/health").set(3);
+    fleet.child("patrol").set(patrol);
+    fleetHealth.child("patrol/health").set(2);
   }
 
   function boardCell(coordinates, gridNumber) {
@@ -316,7 +323,6 @@ $(document).ready(function() {
         var opponentSub = snapshot.val().sub;
         var opponentPatrol = snapshot.val().patrol;
         var totalOccupiedCells = [opponentCarrier, opponentBattleship, opponentDestroyer, opponentSub, opponentPatrol];
-        debugger
         checkForHit(attackCoordinates, totalOccupiedCells); //check for hit or miss
         renderAttack(attackCoordinates); //render attack with css
         gameRef.child(PLAYER_TURN_LOCATION).set(opponent);
@@ -333,6 +339,7 @@ $(document).ready(function() {
 
   function checkForHit(attackCoordinates, totalOccupiedCells) {
     for (var i=0; i<totalOccupiedCells.length; i++) {
+      var test = totalOccupiedCells[i];
       for(var j=0; j<totalOccupiedCells[i].length; j++) {
         if (attackCoordinates.toString() === totalOccupiedCells[i][j].toString()) {
           hit = true;
@@ -345,22 +352,47 @@ $(document).ready(function() {
     }
   }
 
+  var currentHealth;
+  function findHealth(boatString) {
+    var boat = boatString;
+    var HEALTH = gameRef.child("player_data/" + opponent + "/health/" + boatString + "/health");
+    HEALTH.on("value", function(snapshot) {
+      currentHealth = snapshot.val();
+    });
+  }
+
+  function adjustShipHealth(currentHealth, boatString) {
+    var newHealth = (currentHealth - 1);
+    var health = gameRef.child("player_data/" + opponent + "/health/" + boatString + "/health");
+    health.set(newHealth);
+  }
+
   function checkWhichShip(i) {
     switch(i) {
       case 0:
-        alert('hit the carrier');
+        //alert('hit the carrier');
+        findHealth('carrier');
+        adjustShipHealth(currentHealth, 'carrier');
         break;
       case 1:
-        alert('hit the battleship');
+        // alert('hit the battleship');
+        findHealth('battleship');
+        adjustShipHealth(currentHealth, 'battleship');
         break;
       case 2:
-        alert('hit the destroyer');
+        // alert('hit the destroyer');
+        findHealth('destroyer');
+        adjustShipHealth(currentHealth, 'destroyer');
         break;
       case 3:
-        alert('hit the sub');
+        // alert('hit the sub');
+        findHealth('sub');
+        adjustShipHealth(currentHealth, 'sub');
         break;
       case 4:
-        alert('hit the patrol');
+        // alert('hit the patrol');
+        findHealth('patrol');
+        adjustShipHealth(currentHealth, 'patrol');
     }
   }
 
