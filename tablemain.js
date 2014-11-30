@@ -353,8 +353,8 @@ $(document).ready(function() {
   }
 
   var currentHealth;
+
   function findHealth(boatString) {
-    var boat = boatString;
     var HEALTH = gameRef.child("player_data/" + opponent + "/health/" + boatString + "/health");
     HEALTH.on("value", function(snapshot) {
       currentHealth = snapshot.val();
@@ -373,26 +373,31 @@ $(document).ready(function() {
         //alert('hit the carrier');
         findHealth('carrier');
         adjustShipHealth(currentHealth, 'carrier');
+        checkForSink('carrier');
         break;
       case 1:
         // alert('hit the battleship');
         findHealth('battleship');
         adjustShipHealth(currentHealth, 'battleship');
+        checkForSink('battleship');
         break;
       case 2:
         // alert('hit the destroyer');
         findHealth('destroyer');
         adjustShipHealth(currentHealth, 'destroyer');
+        checkForSink('destroyer');
         break;
       case 3:
         // alert('hit the sub');
         findHealth('sub');
         adjustShipHealth(currentHealth, 'sub');
+        checkForSink('sub');
         break;
       case 4:
         // alert('hit the patrol');
         findHealth('patrol');
         adjustShipHealth(currentHealth, 'patrol');
+        checkForSink('patrol');
     }
   }
 
@@ -427,6 +432,12 @@ $(document).ready(function() {
         $('#begin-modal').hide('pulsate');
       }
     });
+  }
+
+  function checkForSink(boat) {
+    if (currentHealth === 0) {
+      alert('YOU SUNK THE ' + boat + "!");
+    }
   }
 
 });
