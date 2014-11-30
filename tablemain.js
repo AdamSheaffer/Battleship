@@ -4,7 +4,7 @@ var gameRef;
 var myPlayerNumber;
 var opponent;
 
-//Taken fro the firebase recipe page
+//Taken from the firebase recipe page
 function go() {
   var userId = prompt('Username?', 'Guest');
   // Consider adding '/<unique id>' if you have multiple games.
@@ -111,6 +111,8 @@ var sub = [];
 var destroyer = [];
 var patrol = [];
 var unabated = true;
+var currentHealth;
+var totalHits = 0;
 
 $(document).ready(function() {
 
@@ -312,7 +314,8 @@ $(document).ready(function() {
 
   $('.sea-2 td').click(function(){
     checkTurn();
-    if(playerTurn === myPlayerNumber && allPiecesAreOnBoard) {
+    console.log(playerTurn + '' + $(this).hasClass('fired-on'));
+    if(playerTurn === myPlayerNumber && allPiecesAreOnBoard && $(this).hasClass('fired-on') === false) {
       var x = $(this).data("x");
       var y = $(this).data("y");
       var attackCoordinates = [x, y];
@@ -352,8 +355,6 @@ $(document).ready(function() {
     }
   }
 
-  var currentHealth;
-
   function findHealth(boatString) {
     var HEALTH = gameRef.child("player_data/" + opponent + "/health/" + boatString + "/health");
     HEALTH.on("value", function(snapshot) {
@@ -368,6 +369,7 @@ $(document).ready(function() {
   }
 
   function checkWhichShip(i) {
+    totalHits += 1;
     switch(i) {
       case 0:
         //alert('hit the carrier');
@@ -406,8 +408,10 @@ $(document).ready(function() {
     var cellElement = boardCell(cellCoordinates, 2);
     if (hit === true) {
       cellElement.css("background-image", "url('tableimages/hit.gif')");
+      cellElement.addClass('fired-on');
     } else {
       cellElement.css("background-image", "url('tableimages/miss.gif')");
+      cellElement.addClass('fired-on');
     }
   }
 
@@ -418,6 +422,7 @@ $(document).ready(function() {
       if (opponentReady !== "ready") {
         $('#lightbox').show('drop');
         $('#begin-modal').show('drop');
+        $('#waiting').show('drop');
         waitForOpponent();
       }
     });
@@ -436,8 +441,25 @@ $(document).ready(function() {
 
   function checkForSink(boat) {
     if (currentHealth === 0) {
-      alert('YOU SUNK THE ' + boat + "!");
+      $('#lightbox2').show('drop');
+      $('#modal').show('drop');
+      $('#sunk').text('You sunk the ' + boat + "!");
+      checkForWin(boat);
+      $('#sunk').show('drop');
     }
   }
+
+  function checkForWin(boat) {
+    if (totalHits === 17) {
+      console.log('you win!');
+      $('#sunk').text("You sunk the " + boat + "! You Win!");
+    }
+  }
+
+  $("#close-modal").click(function() {
+    $('#lightbox2').hide('drop');
+    $('#modal').hide('explode');
+    $('#sunk').hide('explode');
+  });
 
 });

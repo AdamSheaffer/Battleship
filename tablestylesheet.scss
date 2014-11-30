@@ -169,7 +169,7 @@ td {
   background-repeat: no-repeat;
 }
 
-#lightbox {
+#lightbox, #lightbox2 {
   position: fixed;
   height: 100%;
   width: 100%;
@@ -180,7 +180,7 @@ td {
   display: none;
 }
 
-#begin-modal {
+#begin-modal, #modal {
   display: none;
   top: 15%;
   left: 35%;
@@ -194,6 +194,23 @@ td {
   border-radius: 2px;
   background-color: #f8f8f8;
   border: solid 5px #CECECE;
+}
+
+#waiting, #sunk {
+  display: none;
   font-size: 24px;
   font-weight: 700;
+}
+
+#sunk {
+  cursor: pointer;
+}
+
+#close-modal {
+  float: right;
+  width: 25px;
+  height: 25px;
+  margin-top: -32px;
+  margin-right: -32px;
+  cursor: pointer;
 }
